@@ -12,32 +12,56 @@ device = torch.device('mps' if torch.backends.mps.is_available() else 'cpu')
 print(f"Using device: {device}")
 
 # Define the Denoising Model
-class LidarDenoiser(nn.Module):
+class LidarDenoiserConv(nn.Module):
     def __init__(self, input_size=60):
-        super(LidarDenoiser, self).__init__()
+        super(LidarDenoiserConv, self).__init__()
         self.input_size = input_size
         self.encoder = nn.Sequential(
-            nn.Conv1d(1, 2**5, kernel_size=5, padding=2),
+            nn.Conv1d(1, 2**5, kernel_size=5, padding_mode='circular'),
             nn.ReLU(),
-            nn.Conv1d(2**5, 2**6, kernel_size=5, padding=2),
+            nn.Conv1d(2**5, 2**6, kernel_size=5, padding_mode='circular'),
             nn.ReLU(),
-            nn.Conv1d(2**6, 2**7, kernel_size=5, padding=2),
-            nn.ReLU()
+            nn.Conv1d(2**6, 2**7, kernel_size=5, padding_mode='circular'),
+            nn.ReLU(),
+        )
+        # Calculate the size of the flattened vector
+        self.conv_output_size = 128 * input_size # (channels * length)
+
+        # Define your dense layers
+        self.dense_layers = nn.Sequential(
+            nn.Linear(self.conv_output_size, 512), # Bottleneck layer
+            nn.ReLU(),
+            nn.Linear(512, self.conv_output_size), # Expand back to original size
+            nn.ReLU(),
         )
         
         self.decoder = nn.Sequential(
-            nn.ConvTranspose1d(2**7, 2**6, kernel_size=5, padding=2),
+            nn.ConvTranspose1d(2**7, 2**6, kernel_size=5, padding_mode='circular'),
             nn.ReLU(),
-            nn.ConvTranspose1d(2**6, 2**5, kernel_size=5, padding=2),
+            nn.ConvTranspose1d(2**6, 2**5, kernel_size=5, padding_mode='circular'),
             nn.ReLU(),
-            nn.ConvTranspose1d(2**5, 1, kernel_size=5, padding=2),
+            nn.ConvTranspose1d(2**5, 1, kernel_size=5, padding_mode='circular'),
             nn.Sigmoid()  # Output between 0-1 (normalized distances)
         )
     
     def forward(self, x):
-        x = self.encoder(x)
-        x = self.decoder(x)
-        return x
+        # 1. Encode
+        encoded = self.encoder(x) # shape: (batch_size, 128, L)
+        
+        # 2. Flatten for dense layers
+        batch_size = encoded.shape[0]
+        flattened = encoded.view(batch_size, -1) # shape: (batch_size, 128 * L)
+        
+        # 3. Process with dense layers
+        dense_output = self.dense_layers(flattened) # shape: (batch_size, 128 * L)
+        
+        # 4. Reshape back to 3D for decoder
+        reshaped = dense_output.view(batch_size, 128, self.input_size) # shape: (batch_size, 128, L)
+
+        # 5. Decode
+        decoded = self.decoder(reshaped) # shape: (batch_size, 1, L)
+        
+        return decoded
 
 # Dataset class with proper metadata verification
 class LidarDataset(Dataset):
@@ -162,7 +186,7 @@ def train_model():
         test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, drop_last=True)
         
         # Initialize model and move to device
-        model = LidarDenoiser(input_size=full_dataset.ray_count).to(device)
+        model = LidarDenoiserConv(input_size=full_dataset.ray_count).to(device)
         criterion = nn.MSELoss()
         optimizer = optim.Adam(model.parameters(), lr=learning_rate)
         
@@ -224,8 +248,8 @@ def train_model():
             else:
                 patience_counter += 1
             
-            print(f'Epoch [{epoch+1}/{num_epochs}], Time: {epoch_time:.2f}s, '
-                  f'Train Loss: {avg_train_loss:.6f}, Val Loss: {avg_val_loss:.6f}, '
+            print(f'Epoch [{epoch+1}/{num_epochs}], Time: {epoch_time:.1f}s, '
+                  f'Train Loss: {avg_train_loss:.7f}, Val Loss: {avg_val_loss:.7f}, '
                   f'Patience: {patience_counter}/{patience}')
             
             if patience_counter >= patience:

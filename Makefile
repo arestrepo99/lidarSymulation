@@ -7,13 +7,14 @@ CXXFLAGS = -Wall -Wextra -std=c++17
 # Library paths (customize these based on your system)
 SDL2_PREFIX = /opt/homebrew/opt/sdl2
 PYTORCH_PREFIX = /opt/homebrew/opt/pytorch
+RAYLIB_PREFIX = /opt/homebrew/opt/raylib
 
 # Include paths
-INCLUDES = -I$(SDL2_PREFIX)/include/SDL2 -I$(PYTORCH_PREFIX)/include -Isrc/headers
+INCLUDES = -I$(SDL2_PREFIX)/include/SDL2 -I$(PYTORCH_PREFIX)/include -I$(RAYLIB_PREFIX)/include -Isrc/headers
 
 # Library flags
-LDFLAGS = -L$(SDL2_PREFIX)/lib -L$(PYTORCH_PREFIX)/lib
-LIBS = -lSDL2 -lm -ltorch -lc10 -ltorch_cpu -lstdc++
+LDFLAGS = -L$(SDL2_PREFIX)/lib -L$(PYTORCH_PREFIX)/lib -L$(RAYLIB_PREFIX)/lib
+LIBS = -lSDL2 -lm -ltorch -lc10 -ltorch_cpu -lstdc++ -lraylib
 
 # Source directories
 C_SRCDIR = src/c
@@ -69,8 +70,8 @@ clean:
 
 # Install dependencies (macOS-specific)
 install-deps:
-	brew install sdl2 pytorch
-
+	brew install sdl2 pytorch raylib
+	
 # Run lidar simulation
 run-simulation: $(BINDIR)/lidar_simulation
 	./$(BINDIR)/lidar_simulation
@@ -79,7 +80,7 @@ run-simulation: $(BINDIR)/lidar_simulation
 run-data-gen: $(BINDIR)/data_generator
 	./$(BINDIR)/data_generator
 
-run-test-c: $(BINDIR)/test_c
+run-test: $(BINDIR)/test_c
 	./$(BINDIR)/test_c
 
 print-sources:

@@ -6,6 +6,7 @@
         "stdio.h": "c",
         "lidar_denoiser_integration.h": "c",
         "string.h": "c",
-        "lidar_denoiser_c.h": "c"
+        "lidar_denoiser_c.h": "c",
+        "sdl.h": "c"
     }
 }

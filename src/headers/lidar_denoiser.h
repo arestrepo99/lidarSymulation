@@ -17,7 +17,7 @@ public:
 private:
     torch::jit::script::Module model;
     bool model_loaded;
-    const int input_size = 60;
+    const int input_size = 120;
     const float max_distance = 2000.0f;
 };
 

@@ -4,7 +4,7 @@
 #include <time.h>
 #include "lidar_denoiser_integration.h"
 
-#define RAY_COUNT 60
+#define RAY_COUNT 120
 #define NOISE_LEVEL 10.0
 
 int main(int argc, char* argv[]) {

@@ -21,7 +21,7 @@ int main() {
     }
     
     // Prepare output buffer
-    const int output_size = 60;
+    const int output_size = 120;
     float* output = (float*)malloc(output_size * sizeof(float));
     if (!output) {
         printf("Memory allocation failed!\n");

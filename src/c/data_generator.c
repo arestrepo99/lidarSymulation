@@ -3,10 +3,11 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #define NUM_SAMPLES 200000
 #define MAX_SHAPES_PER_SAMPLE 10
-#define RAY_COUNT 60
+#define RAY_COUNT 120
 #define NOISE_LEVEL 10.0
 
 typedef struct {
@@ -90,6 +91,9 @@ int main() {
     LidarSystem* lidarSystem = createLidarSystem(MAX_SHAPES_PER_SAMPLE + 4, RAY_COUNT, false);
     setNoiseLevel(lidarSystem, NOISE_LEVEL);
     
+    // Make directory data if not exists
+    mkdir("data", 0755);
+
     // Open output file
     FILE* output_file = fopen("data/lidar_training_data.bin", "wb");
     if (!output_file) {
