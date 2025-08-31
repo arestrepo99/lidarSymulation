@@ -1,0 +1,20 @@
+{
+    "configurations": [
+        {
+            "name": "Mac",
+            "includePath": [
+                "${workspaceFolder}/src/headers/**",
+                "${workspaceFolder}/src/c/**",
+                "${workspaceFolder}/src/cpp/**",
+                "/opt/homebrew/opt/sdl2/**",
+                "/opt/homebrew/opt/pytorch/**",
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c17",
+            "cppStandard": "c++14",
+            "intelliSenseMode": "macos-clang-arm64"
+        }
+    ],
+    "version": 4
+}

@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "math.h": "c",
+        "vector": "cpp",
+        "rendering.h": "c",
+        "stdio.h": "c",
+        "lidar_denoiser_integration.h": "c",
+        "string.h": "c",
+        "lidar_denoiser_c.h": "c"
+    }
+}
