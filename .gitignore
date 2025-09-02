@@ -3,3 +3,4 @@
 /lib/*
 /models/*
 /build/obj/*
+*.DS_Store

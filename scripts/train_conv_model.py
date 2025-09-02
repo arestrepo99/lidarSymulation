@@ -96,7 +96,7 @@ class LidarDataset(Dataset):
             self.raw_data = f.read()
         
         # Normalization parameters
-        self.max_distance = 2000.0  # Maximum expected distance
+        self.max_distance = 1200.0  # Maximum expected distance
         
         # Verify the first few samples to ensure consistency
         self._verify_sample_consistency()

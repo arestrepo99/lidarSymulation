@@ -59,6 +59,10 @@ $(BINDIR)/lidar_simulation: $(OBJDIR)/main.o $(OBJDIR)/lidar_system.o $(OBJDIR)/
 $(BINDIR)/data_generator: $(OBJDIR)/data_generator.o $(OBJDIR)/lidar_system.o | $(BINDIR)
 	$(CC) $^ -o $@ $(LDFLAGS) $(LIBS)
 
+# data_generator_temporal
+$(BINDIR)/data_generator_temporal: $(OBJDIR)/data_generator_temporal.o $(OBJDIR)/lidar_system.o | $(BINDIR)
+	$(CC) $^ -o $@ $(LDFLAGS) $(LIBS)
+
 # test_c
 $(BINDIR)/test_c: $(OBJDIR)/test_c.o $(OBJDIR)/lidar_denoiser_c.o $(OBJDIR)/lidar_denoiser.o | $(BINDIR)
 	$(CC) $^ -o $@ $(LDFLAGS) $(LIBS)
@@ -79,6 +83,9 @@ run-simulation: $(BINDIR)/lidar_simulation
 # Run data generator
 run-data-gen: $(BINDIR)/data_generator
 	./$(BINDIR)/data_generator
+
+run-data-gen-temporal: $(BINDIR)/data_generator_temporal
+	./$(BINDIR)/data_generator_temporal
 
 run-test: $(BINDIR)/test_c
 	./$(BINDIR)/test_c
