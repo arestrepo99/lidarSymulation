@@ -94,9 +94,10 @@ class HybridConvLSTMLidar(nn.Module):
         # c_n: (batch_size, 1, hidden_size)
 
         fused = torch.cat([encoded, context], dim=2)  # (batch_size, seq_len, bottleneck_size + hidden_size)
-
-        last_frame = fused[:, -1, :]  # (batch_size, bottleneck_size + hidden_size)
-        decoded = self.decoder(last_frame)  # (batch_size, 1, input_size) -> (batch_size, input_size)
+        # last_frame = fused[:, -1, :]  # (batch_size, bottleneck_size + hidden_size)
+        
+        fused = fused.view(batch_size * seq_len, self.bottleneck_size + self.hidden_size) # (batch_size * seq_len, bottleneck_size + hidden_size)
+        decoded = self.decoder(fused)  # (batch_size, 1, input_size) -> (batch_size, input_size)
 
         return decoded
 
@@ -134,23 +135,24 @@ class TemporalLidarDataset(Dataset):
             # Create input-output pairs with the specified sequence length
             for i in range(len(sequence) - self.sequence_length):
                 input_seq = torch.stack(measured_normalized[i:i+self.sequence_length])
-                output = true_normalized[i+self.sequence_length]  # Predict the true distance of the next step
-                
-                self.sequences.append((input_seq, output))
-        
+                # output = true_normalized[i+self.sequence_length]  # Predict the denoised distance of the last step
+                # self.sequences.append((input_seq, output))
+                output_seq = torch.stack(true_normalized[i:i+self.sequence_length]) # Predict the denoised distances of the entire sequence
+                self.sequences.append((input_seq, output_seq))
+
         print(f"Created {len(self.sequences)} training sequences")
     
     def __len__(self):
         return len(self.sequences)
     
     def __getitem__(self, idx):
-        input_seq, output = self.sequences[idx]
-        return input_seq, output.unsqueeze(0)  # Add channel dimension
+        input_seq, output_seq = self.sequences[idx]
+        return input_seq, output_seq
 
 # Training function for the LSTM model
 def train_temporal_model():
     # Hyperparameters
-    batch_size = 16
+    batch_size = 128
     learning_rate = 0.001
     num_epochs = 200
     sequence_length = 10  # Number of previous steps to use for prediction
@@ -207,10 +209,10 @@ def train_temporal_model():
             
             optimizer.zero_grad()
             outputs = model(sequences)
-            loss = criterion(outputs, targets)
+            # loss = criterion(outputs, targets)
+            loss = criterion(outputs.squeeze(1), targets.view(-1, full_dataset.ray_count))
             loss.backward()
             optimizer.step()
-            
             train_loss += loss.item()
         
         avg_train_loss = train_loss / len(train_loader)
@@ -377,6 +379,7 @@ def predict_next_step(model, previous_sequence, device='cpu'):
         input_seq = previous_sequence.unsqueeze(0).to(device)
         prediction = model(input_seq)
         return prediction.squeeze(0).cpu()  # Remove batch dimension and return to CPU
+    
 
 
 def export_lstm_to_torchscript(model, sequence_length=10, ray_count=60):
@@ -403,7 +406,7 @@ def export_lstm_to_torchscript(model, sequence_length=10, ray_count=60):
     return traced_script_module
 
 
-if __name__ == "__main__":
+def main():
     # Train the LSTM model
     model, test_loader, full_dataset = train_temporal_model()
     
@@ -422,3 +425,31 @@ if __name__ == "__main__":
         print(f"Prediction shape: {prediction.shape}")
 
     export_lstm_to_torchscript(model, sequence_length=10, ray_count=full_dataset.ray_count)
+
+def load_best_model_and_dataset():
+    # Hyperparameters
+    sequence_length = 10  # Number of previous steps to use for prediction
+    full_dataset = TemporalLidarDataset('data/lidar_temporal_data.bin', sequence_length=sequence_length)
+    
+    # Initialize model and move to device
+    model = HybridConvLSTMLidar(
+        input_size=full_dataset.ray_count, 
+        sequence_length=sequence_length
+    )
+
+    model.load_state_dict(torch.load('models/lidar_lstm_best.pth', map_location=device))
+
+    model.to(device)
+    return full_dataset, model
+
+
+def test_best_model():
+    full_dataset, model = load_best_model_and_dataset()
+    test_loader = DataLoader(full_dataset, batch_size=1, shuffle=False)
+
+    if model is not None:
+        test_temporal_model(model, test_loader, full_dataset)
+
+if __name__ == "__main__":
+    # test_best_model()
+    main()
