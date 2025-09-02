@@ -98,7 +98,7 @@ class HybridConvLSTMLidar(nn.Module):
         
         fused = fused.view(batch_size * seq_len, self.bottleneck_size + self.hidden_size) # (batch_size * seq_len, bottleneck_size + hidden_size)
         decoded = self.decoder(fused)  # (batch_size, 1, input_size) -> (batch_size, input_size)
-
+        decoded = decoded.view(batch_size, seq_len, self.input_size)  # (batch_size, seq_len, input_size)
         return decoded
 
 # Dataset class for temporal data
@@ -209,8 +209,8 @@ def train_temporal_model():
             
             optimizer.zero_grad()
             outputs = model(sequences)
-            # loss = criterion(outputs, targets)
-            loss = criterion(outputs.squeeze(1), targets.view(-1, full_dataset.ray_count))
+
+            loss = criterion(outputs, targets)
             loss.backward()
             optimizer.step()
             train_loss += loss.item()
