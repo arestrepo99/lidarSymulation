@@ -1,4 +1,4 @@
-2D LIDAR Simulation with Deep Learning Denoising
+### 2D LIDAR Simulation with Deep Learning Denoising
 
 A comprehensive simulation of a 2D LIDAR system with integrated deep learning-based denoising capabilities. This project combines C-based LIDAR simulation with PyTorch-powered neural networks for real-time noise reduction in LIDAR data.
 
