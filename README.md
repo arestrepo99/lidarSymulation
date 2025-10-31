@@ -1,8 +1,8 @@
-### 2D LIDAR Simulation with Deep Learning Denoising
+# 2D LIDAR Simulation with Deep Learning Denoising
 
 A comprehensive simulation of a 2D LIDAR system with integrated deep learning-based denoising capabilities. This project combines C-based LIDAR simulation with PyTorch-powered neural networks for real-time noise reduction in LIDAR data.
 
-📋 Overview
+###📋 Overview
 
 This project implements:
 
@@ -12,7 +12,7 @@ Temporal Processing: LSTM-based models that leverage historical data
 Real-time Visualization: SDL2-based rendering of LIDAR scans
 The denoising approach is inspired by the research paper: "A Novel Lidar Signal Denoising Method Based on Convolutional Autoencoding Deep Learning Neural Network" from Atmosphere MDPI journal.
 https://www.mdpi.com/2073-4433/12/11/1403
-🏗️ Architecture
+### 🏗️ Architecture
 
 Core Components
 
@@ -42,28 +42,28 @@ Raylib (for visualization)
 Installation
 
 bash
-# Clone the repository
+### Clone the repository
 git clone https://github.com/your-username/lidar-simulation.git
 cd lidar-simulation
 
-# Install dependencies (macOS)
+### Install dependencies (macOS)
 make install-deps
 
-# Build the project
+### Build the project
 make all
 Usage
 
 bash
-# Run the main LIDAR simulation with denoising
+### Run the main LIDAR simulation with denoising
 make run-simulation
 
-# Generate training data
+### Generate training data
 make run-data-gen
 
-# Generate temporal training data for LSTM models
+### Generate temporal training data for LSTM models
 make run-data-gen-temporal
 
-# Run C integration tests
+### Run C integration tests
 make run-test
 🎯 Key Features
 
@@ -78,7 +78,7 @@ Denoising Models
 1D CNN + LSTM Architecture
 
 python
-# Pseudocode model structure
+### Pseudocode model structure
 Input: [batch_size, sequence_length, features]
     ↓
 1D Convolutional Layers (feature extraction)
