@@ -22,8 +22,8 @@ The denoising approach is inspired by the research paper: ["A Novel Lidar Signal
    - Configurable noise parameters
 
 2. **Neural Network Models (PyTorch/C++)**
+   - **1D CNN**: Alternative spatial processing approach
    - **1D CNN + LSTM**: Hybrid architecture for temporal denoising
-   - **2D CNN**: Alternative spatial processing approach
    - Real-time inference integration
 
 3. **Data Pipeline**
